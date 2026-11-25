@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Siege Operators CRRUD</title>
+    <style>
+        body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        .box { border: 1px solid #888; padding: 1rem; margin-bottom: 1.5rem; background: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <h1>Rainbow Six Siege Operators</h1>
+
+    {% if selected_op %}
+    <div class="box">
+        <h2>Operator Details: {{ selected_op.OperatorName }} (ID: {{ selected_op.OperatorID }})</h2>
+        <p><strong>Attacker:</strong> {{ selected_op.IsAttacker }} | <strong>Defender:</strong> {{ selected_op.IsDefender }}</p>
+        <p><strong>Health:</strong> {{ selected_op.Health }}</p>
+        <p><strong>Speed:</strong> {{ selected_op.Speed }}</p>
+        <p><strong>Difficulty:</strong> {{ selected_op.Difficulty }}</p>
+        <a href="{{ url_for('home', skip=skip, limit=limit) }}">Close Details</a>
+    </div>
+    {% endif %}
+
+    <div class="box">
+        {% if edit_op %}
+            <h2>Edit Operator: {{ edit_op.OperatorName }}</h2>
+            <form action="{{ url_for('update_operator', op_id=edit_op.OperatorID) }}" method="POST">
+        {% else %}
+            <h2>Add New Operator</h2>
+            <form action="{{ url_for('create_operator') }}" method="POST">
+        {% endif %}
+
+            <label>Name:
+                <input type="text" name="OperatorName" value="{{ edit_op.OperatorName if edit_op else '' }}" required>
+            </label>
+            <label>Health:
+                <input type="number" name="Health" value="{{ edit_op.Health if edit_op else 1 }}" required>
+            </label>
+            <label>Speed:
+                <input type="number" name="Speed" value="{{ edit_op.Speed if edit_op else 2 }}" required>
+            </label>
+            <label>Difficulty:
+                <input type="number" name="Difficulty" value="{{ edit_op.Difficulty if edit_op else 1 }}" required>
+            </label>
+            <label>
+                <input type="checkbox" name="IsAttacker" {% if edit_op and edit_op.IsAttacker %}checked{% endif %}>
+                Attacker?
+            </label>
+
+            <button type="submit">{{ "Save Changes" if edit_op else "Add Operator" }}</button>
+            {% if edit_op %}
+                <a href="{{ url_for('home', skip=skip, limit=limit) }}">Cancel</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <h2>All Operators</h2>
+    <form method="GET" action="{{ url_for('home') }}">
+        <label>Skip: <input type="number" name="skip" value="{{ skip }}" min="0" style="width: 60px;"></label>
+        <label>Limit: <input type="number" name="limit" value="{{ limit }}" min="1" style="width: 60px;"></label>
+        <button type="submit">Apply</button>
+
+        {% if skip > 0 %}
+            <a href="{{ url_for('home', skip=[0, skip - limit]|max, limit=limit) }}">Previous</a>
+        {% endif %}
+        {% if operators|length == limit %}
+            <a href="{{ url_for('home', skip=skip + limit, limit=limit) }}">Next</a>
+        {% endif %}
+    </form>
+    <section>
+        <h2>Find Operator by ID</h2>
+        <form action="{{ url_for('find_operator') }}" method="GET">
+            <label for="op_id">Operator ID:</label>
+            <input type="number" id="op_id" name="op_id" min="1" required>
+            <button type="submit">Find Operator</button>
+        </form>
+    </section>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Side</th>
+                <th>Health</th>
+                <th>Speed</th>
+                <th>Difficulty</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for op in operators %}
+            <tr>
+                <td>{{ op.OperatorID }}</td>
+                <td>{{ op.OperatorName }}</td>
+                <td>{{ "Attacker" if op.IsAttacker else "Defender" }}</td>
+                <td>{{ op.Health }}</td>
+                <td>{{ op.Speed }}</td>
+                <td>{{ op.Difficulty }}</td>
+                <td>
+                    <a href="{{ url_for('home', edit=op.OperatorID, skip=skip, limit=limit) }}">Edit</a> |
+                    <form action="{{ url_for('delete_operator', op_id=op.OperatorID) }}" method="POST" style="display:inline;">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7">No operators found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ operator.OperatorName }} - Details</title>
+</head>
+<body>
+    <h1>{{ operator.OperatorName }}</h1>
+    <ul>
+        <li><strong>ID:</strong> {{ operator.OperatorID }}</li>
+        <li><strong>Role:</strong> {{ "Attacker" if operator.IsAttacker else "Defender" }}</li>
+        <li><strong>Health:</strong> {{ operator.Health }}</li>
+        <li><strong>Speed:</strong> {{ operator.Speed }}</li>
+        <li><strong>Difficulty:</strong> {{ operator.Difficulty }}</li>
+    </ul>
+
+    <a href="{{ url_for('home', edit=operator.OperatorID) }}">Edit Operator</a> |
+    <a href="{{ url_for('home') }}">Back to All Operators</a>
+</body>
+</html>
